@@ -1,62 +1,95 @@
 <!DOCTYPE html>
 <html>
-<head>
-	<title>Reading Tracker</title>
-</head>
-<body>
-	<h1>My Reading Tracker</h1>
-	<p>Today's Date: <span id="currentDate"></span></p>
-	<p>Pages Read Today: <input type="number" id="pagesReadToday"></p>
-	<p>Total Pages Read: <span id="totalPagesRead"></span></p>
-	<p>Current Book: <input type="text" id="currentBook"></p>
-	<p>Book Pages: <input type="number" id="bookPages"> Pages</p>
-	<p>Pages Read So Far: <input type="number" id="pagesReadSoFar"> Pages</p>
-	<p>Days to Finish Book: <span id="daysToFinishBook"></span></p>
-
-	<script>
-		// Get current date
-		var currentDate = new Date();
-		document.getElementById("currentDate").innerHTML = currentDate.toDateString();
-
-		// Set daily reading goal
-		var dailyGoal = 15;
-
-		// Get total pages read
-		var totalPagesRead = parseInt(localStorage.getItem("totalPagesRead")) || 0;
-		document.getElementById("totalPagesRead").innerHTML = totalPagesRead;
-
-		// Update total pages read
-		var pagesReadToday = document.getElementById("pagesReadToday");
-		pagesReadToday.addEventListener("input", function() {
-			totalPagesRead += parseInt(pagesReadToday.value);
-			localStorage.setItem("totalPagesRead", totalPagesRead);
-			document.getElementById("totalPagesRead").innerHTML = totalPagesRead;
-
-			// Check if ahead or behind schedule
-			var daysLeftInYear = (new Date(currentDate.getFullYear(), 11, 31) - currentDate) / (1000 * 60 * 60 * 24);
-			var totalDaysNeeded = (parseInt(localStorage.getItem("bookPages")) - parseInt(localStorage.getItem("pagesReadSoFar"))) / dailyGoal;
-			var daysAheadOrBehind = Math.floor(totalDaysNeeded - daysLeftInYear);
-			if (daysAheadOrBehind > 0) {
-				document.getElementById("daysToFinishBook").innerHTML = "Behind by " + daysAheadOrBehind + " days";
-			} else if (daysAheadOrBehind < 0) {
-				document.getElementById("daysToFinishBook").innerHTML = "Ahead by " + Math.abs(daysAheadOrBehind) + " days";
-			} else {
-				document.getElementById("daysToFinishBook").innerHTML = "On schedule!";
-			}
-		});
-
-		// Update current book
-		var currentBook = document.getElementById("currentBook");
-		currentBook.addEventListener("input", function() {
-			localStorage.setItem("currentBook", currentBook.value);
-			localStorage.setItem("bookPages", document.getElementById("bookPages").value);
-			localStorage.setItem("pagesReadSoFar", document.getElementById("pagesReadSoFar").value);
-		});
-
-		// Set current book info
-		currentBook.value = localStorage.getItem("currentBook") || "";
-		document.getElementById("bookPages").value = localStorage.getItem("bookPages") || "";
-		document.getElementById("pagesReadSoFar").value = localStorage.getItem("pagesReadSoFar") || "";
-	</script>
-</body>
-</html>
+  <head>
+    <title>Reading Tracker</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+      body {
+        font-family: sans-serif;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        max-width: 600px;
+        margin: auto;
+        padding: 20px;
+      }
+      h1, h2 {
+        text-align: center;
+      }
+      label {
+        display: block;
+        margin-top: 10px;
+      }
+      input[type="number"] {
+        width: 100px;
+        margin-left: 10px;
+      }
+      button {
+        display: block;
+        margin-top: 20px;
+        padding: 10px;
+        border: none;
+        background-color: #007bff;
+        color: #fff;
+        cursor: pointer;
+      }
+      .status {
+        margin-top: 20px;
+        padding: 10px;
+        text-align: center;
+        font-weight: bold;
+      }
+      .status.warning {
+        background-color: #ffc107;
+      }
+      .status.danger {
+        background-color: #dc3545;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Reading Tracker</h1>
+      <form>
+        <label for="goal">Daily reading goal (pages):</label>
+        <input type="number" id="goal" min="1" required value="15">
+        <label for="pages">Pages read today:</label>
+        <input type="number" id="pages" min="0" required>
+        <label for="book">Current book:</label>
+        <input type="text" id="book" required>
+        <label for="total-pages">Total pages:</label>
+        <input type="number" id="total-pages" min="1" required>
+        <label for="read-pages">Pages read so far:</label>
+        <input type="number" id="read-pages" min="0" required>
+        <label for="start-date">When did you start reading it?</label>
+        <input type="date" id="start-date" required>
+        <button type="submit">Submit</button>
+      </form>
+      <div id="status" class="status"></div>
+    </div>
+    <script>
+      const form = document.querySelector('form');
+      const goalInput = document.querySelector('#goal');
+      const pagesInput = document.querySelector('#pages');
+      const bookInput = document.querySelector('#book');
+      const totalPagesInput = document.querySelector('#total-pages');
+      const readPagesInput = document.querySelector('#read-pages');
+      const startDateInput = document.querySelector('#start-date');
+      const status = document.querySelector('#status');
+      
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        const goal = goalInput.value;
+        const pages = pagesInput.value;
+        const book = bookInput.value;
+        const totalPages = totalPagesInput.value;
+        const readPages = readPagesInput.value;
+        const startDate = new Date(startDateInput.value);
+        const currentDate = new Date();
+        const daysElapsed = Math.ceil((currentDate - startDate) / (1000 * 60 * 60 * 24));
+        const pagesLeft = totalPages - readPages;
+        const daysLeft = Math.ceil(pagesLeft / goal);
+        const targetDate = new Date(currentDate.getTime() +
