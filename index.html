@@ -92,4 +92,35 @@
         const daysElapsed = Math.ceil((currentDate - startDate) / (1000 * 60 * 60 * 24));
         const pagesLeft = totalPages - readPages;
         const daysLeft = Math.ceil(pagesLeft / goal);
-        const targetDate = new Date(currentDate.getTime() +
+        const targetDate = new Date(currentDate.getTime() + (daysLeft * 24 * 60 * 60 * 1000));
+    if (pages > totalPages) {
+      status.innerText = "Error: Pages read today cannot be greater than total pages.";
+      status.classList.add('danger');
+      return;
+    }
+
+    if (readPages > totalPages) {
+      status.innerText = "Error: Pages read so far cannot be greater than total pages.";
+      status.classList.add('danger');
+      return;
+    }
+
+    if (startDate > currentDate) {
+      status.innerText = "Error: Start date cannot be in the future.";
+      status.classList.add('danger');
+      return;
+    }
+    if (pages >= goal) {
+      status.innerText = `Congratulations! You reached your goal of ${goal} pages today!`;
+      status.classList.add('success');
+    } else if (daysElapsed >= 7) {
+      status.innerText = "Warning: It's been over a week since you started reading.";
+      status.classList.add('warning');
+    } else {
+      status.innerText = `You have ${daysLeft} days left to reach your goal of ${totalPages} pages.`;
+      status.classList.add('info');
+    }
+  });
+</script>
+  </body>
+</html>
