@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Reading Tracker</title>
+</head>
+<body>
+	<h1>My Reading Tracker</h1>
+	<p>Today's Date: <span id="currentDate"></span></p>
+	<p>Pages Read Today: <input type="number" id="pagesReadToday"></p>
+	<p>Total Pages Read: <span id="totalPagesRead"></span></p>
+	<p>Current Book: <input type="text" id="currentBook"></p>
+	<p>Book Pages: <input type="number" id="bookPages"> Pages</p>
+	<p>Pages Read So Far: <input type="number" id="pagesReadSoFar"> Pages</p>
+	<p>Days to Finish Book: <span id="daysToFinishBook"></span></p>
+
+	<script>
+		// Get current date
+		var currentDate = new Date();
+		document.getElementById("currentDate").innerHTML = currentDate.toDateString();
+
+		// Set daily reading goal
+		var dailyGoal = 15;
+
+		// Get total pages read
+		var totalPagesRead = parseInt(localStorage.getItem("totalPagesRead")) || 0;
+		document.getElementById("totalPagesRead").innerHTML = totalPagesRead;
+
+		// Update total pages read
+		var pagesReadToday = document.getElementById("pagesReadToday");
+		pagesReadToday.addEventListener("input", function() {
+			totalPagesRead += parseInt(pagesReadToday.value);
+			localStorage.setItem("totalPagesRead", totalPagesRead);
+			document.getElementById("totalPagesRead").innerHTML = totalPagesRead;
+
+			// Check if ahead or behind schedule
+			var daysLeftInYear = (new Date(currentDate.getFullYear(), 11, 31) - currentDate) / (1000 * 60 * 60 * 24);
+			var totalDaysNeeded = (parseInt(localStorage.getItem("bookPages")) - parseInt(localStorage.getItem("pagesReadSoFar"))) / dailyGoal;
+			var daysAheadOrBehind = Math.floor(totalDaysNeeded - daysLeftInYear);
+			if (daysAheadOrBehind > 0) {
+				document.getElementById("daysToFinishBook").innerHTML = "Behind by " + daysAheadOrBehind + " days";
+			} else if (daysAheadOrBehind < 0) {
+				document.getElementById("daysToFinishBook").innerHTML = "Ahead by " + Math.abs(daysAheadOrBehind) + " days";
+			} else {
+				document.getElementById("daysToFinishBook").innerHTML = "On schedule!";
+			}
+		});
+
+		// Update current book
+		var currentBook = document.getElementById("currentBook");
+		currentBook.addEventListener("input", function() {
+			localStorage.setItem("currentBook", currentBook.value);
+			localStorage.setItem("bookPages", document.getElementById("bookPages").value);
+			localStorage.setItem("pagesReadSoFar", document.getElementById("pagesReadSoFar").value);
+		});
+
+		// Set current book info
+		currentBook.value = localStorage.getItem("currentBook") || "";
+		document.getElementById("bookPages").value = localStorage.getItem("bookPages") || "";
+		document.getElementById("pagesReadSoFar").value = localStorage.getItem("pagesReadSoFar") || "";
+	</script>
+</body>
+</html>
